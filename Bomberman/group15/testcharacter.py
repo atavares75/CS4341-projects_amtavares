@@ -4,7 +4,7 @@ sys.path.insert(0, '../bomberman')
 # Import necessary stuff
 from entity import CharacterEntity
 from colorama import Fore, Back
-from utility_functions import *
+from f_functions import *
 import heapq
 
 

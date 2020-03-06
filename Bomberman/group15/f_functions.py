@@ -1,16 +1,148 @@
 import heapq
+import math
+
+
+def find_bombs(wrld):
+    """ Find the coordinates of all bombs """
+    # PARAM [world.World] wrld: the world which we want to search
+    # RETURN [list of (int, int)]: coordinates of all bombs in the world
+
+    bombs = []
+    for x in range(0, wrld.width()):
+        for y in range(0, wrld.height()):
+            if wrld.bomb_at(x,y):
+                bombs.append(x,y)
+
+    return bombs
+
+
+def find_explosions(wrld):
+    """ Find the coordinates of any explosions """
+    # PARAM [world.World] wrld: the world which we want to search
+    # RETURN [list of (int, int)]: coordinates of all explosions in the world
+
+    explosions = []
+    for x in range(0, wrld.width()):
+        for y in range(0, wrld.height()):
+            if wrld.exit_at(x, y):
+                explosions.append(x, y)
+
+    return explosions
+
+
+def find_exits(wrld):
+    """ Find the coordinates of any exits """
+    # PARAM [world.World] wrld: the world which we want to search
+    # RETURN [list of (int, int)]: coordinates of all exits in the world
+
+    exits = []
+    for x in range(0, wrld.width()):
+        for y in range(0, wrld.height()):
+            if wrld.exit_at(x, y):
+                exits.append(x, y)
+
+    return exits
+
+
+def find_monsters(wrld):
+    """ Find the coordinates of any monsters """
+    # PARAM [world.World] wrld: the world which we want to search
+    # RETURN [list of (int, int)]: coordinates of all monsters in the world
+
+    monsters = []
+    for x in range(0, wrld.width()):
+        for y in range(0, wrld.height()):
+            if wrld.exit_at(x, y):
+                monsters.append(x, y)
+
+    return monsters
+
+
+def find_closest_point(origin, points):
+    """ Find the closest point in a list of points to an origin point """
+    # PARAM [tuple of (int, int)]: the coordinates of the origin point
+    # PARAM [list of (int, int)]: a list of coordinates
+    # RETURN [tuple of (int,int)]: coordinates of the closest point
+    closest = points[0]
+
+    for point in points:
+        if diagonal_distance(origin, point) < diagonal_distance(origin, closest):
+            closest = point
+
+    return point
+
+
+def x_distance_to_bomb(wrld, char):
+    """ Finds the x component of the distance to the closest bomb """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    # Find bombs in the world
+    bombs = find_bombs(wrld)
+
+    if not bombs:
+        return math.inf
+
+    closest_bomb = find_closest_point((char.x, char.y), bombs)
+    x_dist = abs(char.x - closest_bomb[0])
+
+    return x_dist
+
+
+def y_distance_to_bomb(wrld, char):
+    """ Finds the y component of the distance to the closest bomb """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    # Find bombs in the world
+    bombs = find_bombs(wrld)
+
+    if not bombs:
+        return math.inf
+
+    closest_bomb = find_closest_point((char.x, char.y), bombs)
+    y_dist = abs(char.y - closest_bomb[1])
+
+    return y_dist
+
+
+def distance_to_closest_monster(wrld, char):
+    """ Find the distance to the closest monster """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    mnosters = find_monsters(wrld)
+
+    pass
+
+
+
+def distance_to_closest_monster(wrld, char):
+    """ Find the distance to the closest monster """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    pass
+
+
+def distance_to_closest_wall(wrld, char):
+    """ Find the distance to the closest wall """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    pass
 
 
 def diagonal_distance(current, end):
-    """" Calculate the heuristic of a given node """
-    # PARAM [node.Node] current: the current node
-    # PARAM [noe.Node] end: the target node
-    # RETRUN int: the hueristic for the current node
+    """" Calculate the heuristic of a given coordinate """
+    # PARAM [tuple of (int, int)] current: the current coordinate
+    # PARAM [tuple of (int, int)] end: the target coordinate
+    # RETURN int: the heuristic for the current coordinate
 
     # Set D, the cost to move horizontally or vertically, and D2, the cost to move diagonally
     D = D2 = 1
 
-    # Find horizantal distance to the target node, dx, and vertical distance to the target node, dy
+    # Find horizontal distance to the target coordinate, dx, and vertical distance to the target coordinate, dy
     dx = abs(current[0] - end[0])
     dy = abs(current[1] - end[1])
 
@@ -18,9 +150,9 @@ def diagonal_distance(current, end):
 
 
 def get_neighbors(wrld, current):
-    """ Generate a list of possible nodes to move to """
+    """ Generate a list of possible coordinates to move to """
     # PARAM [world.World] wrld: the world which we want to search
-    # PARAM [node.Node] current: the current node
+    # PARAM [tuple of (int,int)] current: the current coordinate
     # RETURN [list of node.Node]: A list of node possible nodes to move to
 
     neighbors = []
@@ -45,9 +177,9 @@ def get_neighbors(wrld, current):
 
 def movelist_from_path(path):
     """ Produce a movelist from the given path """
-    # PARAM [list of node.Nodes] path: the path of nodes to the end goal.
+    # PARAM [list of (int, int)] path: the path of coordinates to the end goal.
     # RETURN [list of (int,int)] movelist: list of tuples (dx,dy) corresponding to the direction of movement to the
-    #                                      next node in the path
+    #                                      next coordinate in the path
 
     movelist = []
     for i in range(1, len(path)):
@@ -61,7 +193,7 @@ def movelist_from_path(path):
 def aStarSearch(wrld, start, end):
     """ Perform the search for the A* algorithm """
     # PARAM [world.World] wrld: the world which we want to search
-    # RETURN [list of node.Node]: a list of nodes leading to the target node
+    # RETURN [list of (int, int)]: a list of coordinates leading to the target node
 
     max_iters = wrld.time
     total_iters = 0
@@ -105,10 +237,12 @@ def aStarSearch(wrld, start, end):
                     heapq.heappush(frontier, (prioirty, neighbor))
                     came_from[neighbor] = current
 
+    # Create the path in reverse order
     while current != start:
         rev_path.append(current)
         current = came_from[current]
 
+    # Reverse the path
     rev_path.append(current)
     path = rev_path[::-1]
 
@@ -116,5 +250,11 @@ def aStarSearch(wrld, start, end):
 
 
 def get_movelist(wrld, start, end):
+    """ Generate a movelist from on point to another """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [tuple of (int,int)] start: coordinates of the start point
+    # PARAM [tuple of (int,int)] end: coordinates of the end point
+
+    # Find the path from start to end
     path = aStarSearch(wrld, start, end)
     return movelist_from_path(path)
