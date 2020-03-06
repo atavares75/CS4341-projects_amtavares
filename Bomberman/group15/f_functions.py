@@ -230,11 +230,12 @@ def aStarSearch(wrld, start, end):
         # Loop through possible neighbors
         for neighbor in get_neighbors(wrld, current):
             if not wrld.wall_at(neighbor[0], neighbor[1]):
+                # Calculate new cost for the neighbor
                 new_cost = cost_so_far[current] + cost_of_move
                 if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
                     cost_so_far[neighbor] = new_cost
-                    prioirty = new_cost + diagonal_distance(current, end)
-                    heapq.heappush(frontier, (prioirty, neighbor))
+                    priority = new_cost + diagonal_distance(current, end)
+                    heapq.heappush(frontier, (priority, neighbor))
                     came_from[neighbor] = current
 
     # Create the path in reverse order
