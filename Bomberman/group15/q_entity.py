@@ -1,3 +1,5 @@
+import math
+import random
 import sys
 
 sys.path.insert(0, '../bomberman')
@@ -14,11 +16,25 @@ class qEntity(CharacterEntity):
         self.iterNum = iterNum
         self.maxIterations = maxIterations
         self.bombs = bombs
+        self.previousWorld = None
 
-    def do(self):
-        if self.trainModel:
-            pass
+
+    def do(self, world):
+        self.previousWorld = world
+        randomChance = 1 / math.sqrt(self.iterNum + 1)
+        if self.trainModel and random.random() < self.randomChance:
+            moves = [-1,0,1]
+
+            dx = random.choice(moves)
+            dy = random.choice(moves)
+
+            if self.bombs:
+                bombs = random.choice(moves[1:2])
+                if bombs == 1:
+                    self.placeBomb()
+            self.move(dx,dy)
         else:
+            # call Q-Learner
             pass
 
     #updates weights

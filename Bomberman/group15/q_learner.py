@@ -20,4 +20,5 @@ class qLearner:
 
 
     def approximate_Q_value(self, world, character):
-        pass
+        sum = 0
+
