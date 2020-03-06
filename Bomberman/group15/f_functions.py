@@ -149,7 +149,7 @@ def diagonal_distance(current, end):
     return D * (dx + dy) + (D2 - 2 * D) * min(dx, dy)
 
 
-def get_neighbors(wrld, current):
+def get_possible_moves(wrld, current):
     """ Generate a list of possible coordinates to move to """
     # PARAM [world.World] wrld: the world which we want to search
     # PARAM [tuple of (int,int)] current: the current coordinate
@@ -228,7 +228,7 @@ def aStarSearch(wrld, start, end):
             break
 
         # Loop through possible neighbors
-        for neighbor in get_neighbors(wrld, current):
+        for neighbor in get_possible_moves(wrld, current):
             if not wrld.wall_at(neighbor[0], neighbor[1]):
                 # Calculate new cost for the neighbor
                 new_cost = cost_so_far[current] + cost_of_move
@@ -247,7 +247,7 @@ def aStarSearch(wrld, start, end):
     rev_path.append(current)
     path = rev_path[::-1]
 
-    return path
+    return path, cost_so_far[end]
 
 
 def get_movelist(wrld, start, end):

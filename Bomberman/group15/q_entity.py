@@ -37,7 +37,7 @@ class qEntity(CharacterEntity):
             # call Q-Learner
             pass
 
-    #updates weights
+    # updates weights
     def done(self):
         pass
 
