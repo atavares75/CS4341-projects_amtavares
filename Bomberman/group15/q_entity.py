@@ -5,10 +5,11 @@ import sys
 sys.path.insert(0, '../bomberman')
 from entity import CharacterEntity
 from sensed_world import SensedWorld
+from f_functions import *
 
 class qEntity(CharacterEntity):
 
-    def __init__(self, name, avatar, x, y, qLearner, iterNum, maxIterations, bombs = True, trainModel=False):
+    def __init__(self, name, avatar, x, y, qLearner, iterNum, maxIterations, bombs=True, trainModel=False):
         CharacterEntity.__init__(name, avatar, x, y)
 
         #Includes other variables needed for q learning
@@ -68,7 +69,16 @@ class qEntity(CharacterEntity):
                 self.place_bomb()
 
     # updates weights
-    def done(self):
-        pass
+    def update_weights(self, wrld, win, lose):
+        if self.trainModel:
+            if win:
+                reward = 100
+            elif lose:
+                reward = -100
+            else:
+                reward = ((f_to_exit(wrld, self)**.2)*5 - (f_to_monster(wrld, self)**.2))
+
+            self.qLearner.update_weights(wrld, self, reward)
+
 
 
