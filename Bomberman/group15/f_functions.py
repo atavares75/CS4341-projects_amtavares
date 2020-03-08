@@ -69,7 +69,7 @@ def find_closest_point(origin, points):
         if diagonal_distance(origin, point) < diagonal_distance(origin, closest):
             closest = point
 
-    return point
+    return closest
 
 
 def x_distance_to_bomb(wrld, char):
@@ -106,31 +106,90 @@ def y_distance_to_bomb(wrld, char):
     return y_dist
 
 
-def distance_to_closest_monster(wrld, char):
+    ############
+    # Features #
+    ############
+
+def f_to_closest_monster(wrld, char):
     """ Find the distance to the closest monster """
     # PARAM [world.World] wrld: the world which we want to search
     # PARAM [entity.CharacterEntity] char: a character entity
 
-    mnosters = find_monsters(wrld)
+    monsters = find_monsters(wrld)
+    char_loc = (char.x, char.y)
 
-    pass
+    if len(monsters) == 0:
+        return 0
+
+    closest_mnstr = find_closest_point(char_loc, monsters)
+    path_distance = 1 + aStarSearch(wrld, char_loc, closest_mnstr)[1]
+
+    return 1 / (path_distance**2)
 
 
-
-def distance_to_closest_monster(wrld, char):
+def f_to_closest_bomb(wrld, char):
     """ Find the distance to the closest monster """
     # PARAM [world.World] wrld: the world which we want to search
     # PARAM [entity.CharacterEntity] char: a character entity
 
-    pass
+    bombs = find_bombs(wrld)
+    char_loc = (char.x, char.y)
+
+    if len(bombs) == 0:
+        return 0
+
+    closest_bomb = find_closest_point(char_loc, bombs)
+    path_distance = 1 + aStarSearch(wrld, char_loc, closest_bomb)[1]
+
+    return 1 / (path_distance ** 2)
 
 
-def distance_to_closest_wall(wrld, char):
+def f_to_closest_exit(wrld, char):
     """ Find the distance to the closest wall """
     # PARAM [world.World] wrld: the world which we want to search
     # PARAM [entity.CharacterEntity] char: a character entity
 
-    pass
+    exits = find_exits(wrld)
+    char_loc = (char.x, char.y)
+
+    if len(exits) == 0:
+        return 0
+
+    closest_exit = find_closest_point(char_loc, exits)
+    path_distance = 1 + aStarSearch(wrld, char_loc, closest_exit)[1]
+
+    return 1 / (path_distance ** 2)
+
+
+def f_existing_bomb(wrld, char = None):
+    """ Find if bombs exist in the world """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    if len(find_bombs(wrld)) == 0:
+        return 0
+
+    return 1
+
+def f_is_exploded(wrld, char):
+    """ Find the current spot is exploded """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    if wrld.me(char) is None:
+        return 1
+
+    if wrld.explosion_at(char.x, char.y) is not None:
+        return 1
+
+    world, _ = wrld.next()
+
+    if wrld.explosion_at(char.x, char.y) is not None:
+        return 1
+
+    return 0
+
+
 
 
 def diagonal_distance(current, end):
@@ -173,21 +232,6 @@ def get_possible_moves(wrld, current):
                         neighbors.append((current[0] + dx, current[1] + dy))
 
     return neighbors
-
-
-def movelist_from_path(path):
-    """ Produce a movelist from the given path """
-    # PARAM [list of (int, int)] path: the path of coordinates to the end goal.
-    # RETURN [list of (int,int)] movelist: list of tuples (dx,dy) corresponding to the direction of movement to the
-    #                                      next coordinate in the path
-
-    movelist = []
-    for i in range(1, len(path)):
-        dx = path[i][0] - path[i - 1][0]
-        dy = path[i][1] - path[i - 1][1]
-        movelist.append((dx, dy))
-
-    return movelist
 
 
 def aStarSearch(wrld, start, end):
@@ -250,6 +294,22 @@ def aStarSearch(wrld, start, end):
     return path, cost_so_far[end]
 
 
+def movelist_from_path(path):
+    """ Produce a movelist from the given path """
+    # PARAM [list of (int, int)] path: the path of coordinates to the end goal.
+    # RETURN [list of (int,int)] movelist: list of tuples (dx,dy) corresponding to the direction of movement to the
+    #                                      next coordinate in the path
+
+    movelist = []
+    for i in range(1, len(path)):
+        dx = path[i][0] - path[i - 1][0]
+        dy = path[i][1] - path[i - 1][1]
+        movelist.append((dx, dy))
+
+    print(movelist)
+    return movelist
+
+
 def get_movelist(wrld, start, end):
     """ Generate a movelist from on point to another """
     # PARAM [world.World] wrld: the world which we want to search
@@ -257,5 +317,5 @@ def get_movelist(wrld, start, end):
     # PARAM [tuple of (int,int)] end: coordinates of the end point
 
     # Find the path from start to end
-    path = aStarSearch(wrld, start, end)
+    path, _ = aStarSearch(wrld, start, end)
     return movelist_from_path(path)

@@ -12,7 +12,7 @@ class qLearner:
 
         pass
 
-    def best_move(self):
+    def best_move(self, world, character):
         pass
 
     def updateWeights(self):
