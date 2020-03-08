@@ -158,7 +158,7 @@ def f_to_closest_exit(wrld, char):
     closest_exit = find_closest_point(char_loc, exits)
     path_distance = 1 + aStarSearch(wrld, char_loc, closest_exit)[1]
 
-    return 1 / (path_distance ** 2)
+    return path_distance
 
 
 def f_existing_bomb(wrld, char = None):

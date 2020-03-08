@@ -16,28 +16,29 @@ import pickle
 
 path = os.path.dirname(os.path.dirname(os.getcwd()))
 
-weights_file = os.path.join(path, "Outputs/TrainingScores/variant1_weights.p")
 
-weights = [0, 0, 0, 0, 0]
+if os.path.exists("../../Outputs/TrainingScores/variant1_weights.p") and os.path.getsize("../../Outputs/TrainingScores/variant1_weights.p") > 0:
+    print("Found weights")
+    weights_file = "../../Outputs/TrainingScores/variant1_weights.p"
+    wf = open(weights_file, 'rb')
+    f = pickle.Unpickler(wf)
+    weights = f.load()
+else:
+    weights_file = os.path.join(path, "Outputs/TrainingScores/variant1_weights.p")
+    weights = [1, -1, -1, 1]
+    wf = open(weights_file, 'wb')
+    pickle.dump(weights, wf)
 
-pickle.dump(weights, open(weights_file, 'wb'))
-
-QLearner = qLearner([f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_is_exploded])
-
-for i in range(0,1):
+QLearner = qLearner(weights, [f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb])
+print(QLearner.weights)
+for i in range(0,10):
     print(f"Iteration #{i}")
 
     # Create the game
     g = Game.fromfile('map.txt',)
 
-    g.add_character(qEntity("me",  # name
-                             "C",  # avatar
-                              0, 0,  # position
-                              QLearner, #qLearner
-                              False,
-                              i,
-                              1000
-                              ))
+    # name, avatar, x, y, qLearner, iterNum, maxIterations, trainModel=False
+    g.add_character(qEntity("me", "C", 0, 0, QLearner, i, 1000, True))
 
     # Run game
     g.go(1)
@@ -49,4 +50,8 @@ for i in range(0,1):
     # else:
     #     QLearner.update_weights(g.world, g.world.characters["me"], -9999)
 
-    print(QLearner.pos, QLearner.move)
+    print(QLearner.weights)
+    weights = QLearner.weights
+
+pickle.dump(weights, open(weights_file, 'wb'))
+wf.close()
