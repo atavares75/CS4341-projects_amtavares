@@ -11,7 +11,7 @@ def find_bombs(wrld):
     for x in range(0, wrld.width()):
         for y in range(0, wrld.height()):
             if wrld.bomb_at(x,y):
-                bombs.append(x,y)
+                bombs.append((x,y))
 
     return bombs
 
@@ -25,7 +25,7 @@ def find_explosions(wrld):
     for x in range(0, wrld.width()):
         for y in range(0, wrld.height()):
             if wrld.exit_at(x, y):
-                explosions.append(x, y)
+                explosions.append((x, y))
 
     return explosions
 
@@ -39,7 +39,7 @@ def find_exits(wrld):
     for x in range(0, wrld.width()):
         for y in range(0, wrld.height()):
             if wrld.exit_at(x, y):
-                exits.append(x, y)
+                exits.append((x, y))
 
     return exits
 
@@ -53,7 +53,7 @@ def find_monsters(wrld):
     for x in range(0, wrld.width()):
         for y in range(0, wrld.height()):
             if wrld.exit_at(x, y):
-                monsters.append(x, y)
+                monsters.append((x, y))
 
     return monsters
 
@@ -306,7 +306,6 @@ def movelist_from_path(path):
         dy = path[i][1] - path[i - 1][1]
         movelist.append((dx, dy))
 
-    print(movelist)
     return movelist
 
 

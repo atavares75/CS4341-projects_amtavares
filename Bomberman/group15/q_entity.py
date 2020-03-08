@@ -9,8 +9,8 @@ from f_functions import *
 
 class qEntity(CharacterEntity):
 
-    def __init__(self, name, avatar, x, y, qLearner, iterNum, maxIterations, bombs=True, trainModel=False):
-        CharacterEntity.__init__(name, avatar, x, y)
+    def __init__(self, name, avatar, x, y, qLearner, trainModel, iterNum, maxIterations, bombs=True):
+        CharacterEntity.__init__(self, name, avatar, x, y)
 
         #Includes other variables needed for q learning
         self.qLearner = qLearner
@@ -26,6 +26,7 @@ class qEntity(CharacterEntity):
 
     def do(self, wrld):
         self.previousWorld = wrld
+        self.qLearner.pos = (self.x, self.y)
 
         if self.trainModel:
             # e-greedy Exploration check
@@ -40,9 +41,11 @@ class qEntity(CharacterEntity):
 
                 dx = random.choice(move_choices)
                 dy = random.choice(move_choices)
+                rbomb = random.choice(bomb_choices)
 
+                self.qLearner.move = (dx, dy, rbomb)
                 # Random chance of placing bomb
-                if random.choice(bomb_choices) == 1:
+                if rbomb == 1:
                     self.place_bomb()
 
                 # Make random move
@@ -51,6 +54,8 @@ class qEntity(CharacterEntity):
             else:
                 # Call Q-Learner
                 move, _ = self.qLearner.best_move(wrld, self)
+                self.qLearner.move = move
+
                 dx, dy, bomb = move
 
                 self.move(dx, dy)
@@ -72,9 +77,9 @@ class qEntity(CharacterEntity):
     def update_weights(self, wrld, win, lose):
         if self.trainModel:
             if win:
-                reward = 100
+                reward = 9999
             elif lose:
-                reward = -100
+                reward = -9999
             else:
                 reward = ((f_to_exit(wrld, self)**.2)*5 - (f_to_monster(wrld, self)**.2))
 
