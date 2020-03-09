@@ -23,9 +23,7 @@ class qEntity(CharacterEntity):
     def do(self, world):
         self.previousWorld = world
         self.iterNum += 1
-        if self.iterNum == self.maxIterations:
-            return
-        randomChance = 1 / (self.iterNum + 1)
+        randomChance = 1 / (self.iterNum + 1) ** .5
         bomb = 0
         dx = 0
         dy = 0
@@ -36,8 +34,7 @@ class qEntity(CharacterEntity):
             bombs = random.choice([0,1])
             if bombs == 1:
                 self.place_bomb()
-            self.move(dx,dy)
-
+            self.move(dx, dy)
         else:
             # Call Q-Learner
             move, _ = self.qLearner.best_move(world, self)
@@ -57,7 +54,7 @@ class qEntity(CharacterEntity):
 
     # updates weights
     def done(self, wrld):
-        print("Updating")
+        print("Done")
         if self.trainModel:
             reward = 0
             for event in wrld.events:

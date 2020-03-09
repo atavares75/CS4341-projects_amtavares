@@ -51,7 +51,7 @@ def get_possible_moves(wrld, current):
         if (current[0] + dx >= 0) and (current[0] + dx < wrld.width()):
             # Loop through delta y
             for dy in [-1, 0, 1]:
-                # Make sure the monster is moving
+                # Make sure the character is moving
                 if (dx != 0) or (dy != 0):
                     # Avoid out-of-bound indexing
                     if (current[1] + dy >= 0) and (current[1] + dy < wrld.height()):

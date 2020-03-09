@@ -24,12 +24,12 @@ if os.path.exists(weights_file) and os.path.getsize(weights_file) > 0:
     f = open(weights_file, 'rb')
     weights = pickle.load(f)
 else:
-    weights = [25, -20, -20, -10, -20, -20]
-
-QLearner = qLearner(weights, [f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_time_to_explosion, f_to_closest_wall], learning_rate = 0.2)
+    weights = [1, -1, -1]
+print(weights)
+QLearner = qLearner(weights, [f_to_closest_exit, f_to_closest_bomb, f_time_to_explosion], learning_rate = 0.2)
 
 start = datetime.datetime.now()
-for i in range(0,100):
+for i in range(0,1):
     print(f"Iteration #{i}")
     # Create the game
     g = Game.fromfile('map.txt',)
