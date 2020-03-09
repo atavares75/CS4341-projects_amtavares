@@ -1,4 +1,5 @@
 from real_world import RealWorld
+from sensed_world import SensedWorld
 from events import Event
 import colorama
 import pygame
@@ -102,15 +103,31 @@ class Game:
                 pygame.time.wait(abs(wait))
 
         colorama.init(autoreset=True)
+
+        me = self.world.characters[0][0]
+
         self.display_gui()
         self.draw()
         step()
         while not self.done():
+            # print("2. Before next() Scores:", self.world.scores)
+            me.qLearner.prevscore = self.world.scores["me"]
             (self.world, self.events) = self.world.next()
+            me.qLearner.newscore = self.world.scores["me"]
+            # print("2.1: After next() Score", self.world.scores)
             self.display_gui()
             self.draw()
             step()
             self.world.next_decisions()
+            reward = me.qLearner.newscore - me.qLearner.prevscore
+            # if we died
+            if reward == 0:
+                print("Loss Update")
+                me.qLearner.update_weights(SensedWorld.from_world(self.world), me, -9999, 1)
+            elif reward > 100:
+                print("Win Update")
+                me.qLearner.update_weights(SensedWorld.from_world(self.world), me, 9999, 1)
+
         colorama.deinit()
 
     ###################
@@ -121,6 +138,7 @@ class Game:
         self.world.printit()
 
     def done(self):
+        # print("1. Done Scores:", self.world.scores)
         # User Exit
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

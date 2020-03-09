@@ -1,4 +1,3 @@
-
 # This is necessary to find the main code
 import sys
 sys.path.insert(0, '../bomberman')
@@ -7,6 +6,12 @@ from f_functions import *
 from events import Event
 from sensed_world import SensedWorld
 
+import os
+import pickle
+
+# Training Values
+GAMMA = .9
+ALPHA = .9
 
 #Q Learner model
 class qLearner:
@@ -71,14 +76,14 @@ class qLearner:
         for i in range(len(self.weights)):
             self.weights[i] += (self.lr * delta * self.heuristics[i](oldWorld, character))
 
-
-    def getAvailableMoves(self, wrld, current):
+    def get_possible_moves(self, wrld, char):
         """ Generate a list of possible coordinates to move to """
         # PARAM [world.World] wrld: the world which we want to search
         # PARAM [tuple of (int,int)] current: the current coordinate
         # RETURN [list of node.Node]: A list of node possible nodes to move to
 
         moves = []
+        current = (char.x, char.y)
 
         # Go through the possible 8-moves
         #
@@ -100,11 +105,47 @@ class qLearner:
 
         return moves
 
+    def best_move(self, wrld, char):
+        max_q_score = -9999
+        max_action = (0, 0, 0)
+
+        for move in self.get_possible_moves(wrld, char):
+            new_world = SensedWorld.from_world(wrld)
+
+            if new_world.me(char) is None:
+                continue
+
+            new_world.me(char).move(move[0], move[1])
+            if move[2] != 0:
+                new_world.me(char).place_bomb()
+
+            new_world, events = new_world.next()
+
+            if new_world.me(char) is None:
+                for event in events:
+                    if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER or event.tpe == Event.BOMB_HIT_CHARACTER:
+                        q = -9999
+
+                    if event.tpe == Event.CHARACTER_FOUND_EXIT:
+                        q = 9999
+
+            else:
+                q = self.approximate_Q_value(new_world, new_world.me(char))
+
+            if q > max_q_score:
+                max_q_score = q
+                max_action = move
+
+        return max_action, max_q_score
 
     def approximate_Q_value(self, world, character):
+        """ Calculate the approximate Q value """
+        # PARAM [world.World] wrld: the world current world
+        # PARAM [entity.CharacterEntity] char: a character entity
+        # RETURN [float]: the approximate Q value
         sum = 0
         for i in range(len(self.heuristics)):
             sum += self.weights[i]*self.heuristics[i](world, world.me(character))
-
         return sum
+
 

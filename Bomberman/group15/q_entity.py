@@ -2,16 +2,15 @@ import math
 import random
 import sys
 
-
 sys.path.insert(0, '../bomberman')
 from entity import CharacterEntity
 from sensed_world import SensedWorld
 from f_functions import *
-from events import Event
+
 
 class qEntity(CharacterEntity):
 
-    def __init__(self, name, avatar, x, y, qLearner, iterNum, maxIterations, trainModel=False):
+    def __init__(self, name, avatar, x, y, qLearner, iterNum, maxIterations, trainModel):
         CharacterEntity.__init__(self, name, avatar, x, y)
 
         #Includes other variables needed for q learning
@@ -19,8 +18,6 @@ class qEntity(CharacterEntity):
         self.trainModel = trainModel
         self.iterNum = iterNum
         self.maxIterations = maxIterations
-        self.previousWorld = None
-
 
     def do(self, world):
         self.previousWorld = world
@@ -39,9 +36,10 @@ class qEntity(CharacterEntity):
             if bombs == 1:
                 self.place_bomb()
             self.move(dx,dy)
+
         else:
             # Call Q-Learner
-            q, move = self.qLearner.best_move(world, self)
+            move, _ = self.qLearner.best_move(world, self)
             dx, dy, bomb = move
             if bomb == 1:
                 self.place_bomb()
@@ -54,10 +52,6 @@ class qEntity(CharacterEntity):
             new_world.me(self).move(dx, dy)
             new_world, _ = new_world.next()
             self.qLearner.updateWeights(self.previousWorld, new_world, self, 0)
-
-
-
-
 
 
     # updates weights
@@ -76,9 +70,10 @@ class qEntity(CharacterEntity):
                     reward = 100
                     break
             if reward == 0:
-                reward = ((f_to_closest_exit(wrld, self))**5 - (f_to_closest_monster(wrld, self)**.2))
+                reward = ((f_to_closest_exit(wrld, self))*5 - (f_to_closest_monster(wrld, self)**.2))
 
             self.qLearner.updateWeights(self.previousWorld, wrld, self, reward)
+
 
 
 
