@@ -6,6 +6,7 @@ sys.path.insert(0, '../bomberman')
 from entity import CharacterEntity
 from sensed_world import SensedWorld
 from f_functions import *
+from events import Event
 
 
 class qEntity(CharacterEntity):

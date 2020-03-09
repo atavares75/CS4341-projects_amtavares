@@ -367,7 +367,7 @@ def f_to_closest_exit(wrld, char):
     closest_exit = find_closest_point(char_loc, exits)
     path_distance = 1 + aStarSearch(wrld, char_loc, closest_exit)[1]
 
-    return 1 / (path_distance ** 2)
+    return 1 / (path_distance)
 
 
 def f_existing_bomb(wrld, char = None):
@@ -380,21 +380,16 @@ def f_existing_bomb(wrld, char = None):
 
     return 1
 
-def f_is_exploded(wrld, char):
+def f_time_to_explosion(wrld, char):
     """ Find the current spot is exploded """
     # PARAM [world.World] wrld: the world which we want to search
     # PARAM [entity.CharacterEntity] char: a character entity
+    char_loc = (char.x, char.y)
+    bombs = find_bombs(wrld)
+    if len(bombs) == 0:
+        return 0
 
-    if wrld.me(char) is None:
-        return 1
-
-    if wrld.explosion_at(char.x, char.y) is not None:
-        return 1
-
-    world, _ = wrld.next()
-
-    if wrld.explosion_at(char.x, char.y) is not None:
-        return 1
-
-    return 0
+    x, y = find_closest_point(char_loc, bombs)
+    closest_bomb = wrld.bomb_at(x, y)
+    return (1 / float(closest_bomb.timer + 1)) ** 2
 
