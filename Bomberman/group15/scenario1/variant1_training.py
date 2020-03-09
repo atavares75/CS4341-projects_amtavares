@@ -29,13 +29,13 @@ else:
 QLearner = qLearner(weights, [f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_time_to_explosion, f_to_closest_wall], learning_rate = 0.2)
 
 start = datetime.datetime.now()
-for i in range(0,1):
+for i in range(0,100):
     print(f"Iteration #{i}")
     # Create the game
     g = Game.fromfile('map.txt',)
 
     # name, avatar, x, y, qLearner, iterNum, maxIterations, trainModel=False
-    g.add_character(qEntity("me", "C", 0, 0, QLearner, i, 1000, True))
+    g.add_character(qEntity("me", "C", 0, 0, QLearner, 1000, True))
 
     # Run game
     g.go(1)

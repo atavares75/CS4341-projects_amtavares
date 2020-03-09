@@ -11,13 +11,13 @@ from events import Event
 
 class qEntity(CharacterEntity):
 
-    def __init__(self, name, avatar, x, y, qLearner, iterNum, maxIterations, trainModel):
+    def __init__(self, name, avatar, x, y, qLearner, maxIterations, trainModel):
         CharacterEntity.__init__(self, name, avatar, x, y)
 
         #Includes other variables needed for q learning
         self.qLearner = qLearner
         self.trainModel = trainModel
-        self.iterNum = iterNum
+        self.iterNum = 1
         self.maxIterations = maxIterations
 
     def do(self, world):

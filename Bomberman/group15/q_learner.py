@@ -65,7 +65,6 @@ class qLearner:
         return best_q, best_action
 
 
-
     def updateWeights(self, oldWorld, newWorld, character, reward):
         if newWorld.me(character) is not None:
             aQv = self.approximate_Q_value(newWorld, newWorld.me(character))
