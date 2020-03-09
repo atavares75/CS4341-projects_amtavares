@@ -1,6 +1,8 @@
 import heapq
 import math
-
+import sys
+sys.path.insert(0, '../bomberman')
+from sensed_world import SensedWorld
 
 def find_bombs(wrld):
     """ Find the coordinates of all bombs """
@@ -124,7 +126,7 @@ def f_to_closest_monster(wrld, char):
     closest_mnstr = find_closest_point(char_loc, monsters)
     path_distance = 1 + aStarSearch(wrld, char_loc, closest_mnstr)[1]
 
-    return 1 / (path_distance**2)
+    return (1 / (path_distance))**2
 
 
 def f_to_closest_bomb(wrld, char):
@@ -141,7 +143,7 @@ def f_to_closest_bomb(wrld, char):
     closest_bomb = find_closest_point(char_loc, bombs)
     path_distance = 1 + aStarSearch(wrld, char_loc, closest_bomb)[1]
 
-    return 1 / (path_distance ** 2)
+    return (1 / (path_distance)) ** 2
 
 
 def f_to_closest_exit(wrld, char):
@@ -158,7 +160,7 @@ def f_to_closest_exit(wrld, char):
     closest_exit = find_closest_point(char_loc, exits)
     path_distance = 1 + aStarSearch(wrld, char_loc, closest_exit)[1]
 
-    return path_distance
+    return math.sqrt(path_distance)
 
 
 def f_existing_bomb(wrld, char = None):
@@ -171,23 +173,20 @@ def f_existing_bomb(wrld, char = None):
 
     return 1
 
-def f_is_exploded(wrld, char):
+def f_time_to_explosion(wrld, char):
     """ Find the current spot is exploded """
     # PARAM [world.World] wrld: the world which we want to search
     # PARAM [entity.CharacterEntity] char: a character entity
+    bombs = find_bombs(wrld)
+    char_loc = (char.x, char.y)
 
-    if wrld.me(char) is None:
-        return 1
+    if len(bombs) == 0:
+        return 0
 
-    if wrld.explosion_at(char.x, char.y) is not None:
-        return 1
+    x, y = find_closest_point(char_loc, bombs)
+    closest_bomb = wrld.bomb_at(x, y)
 
-    world, _ = wrld.next()
-
-    if wrld.explosion_at(char.x, char.y) is not None:
-        return 1
-
-    return 0
+    return (1 / float(closest_bomb.timer + 1)) ** 2
 
 
 

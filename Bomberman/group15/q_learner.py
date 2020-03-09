@@ -22,7 +22,6 @@ class qLearner:
         availableMoves = self.getAvailableMoves(world, (character.x, character.y))
         best_q = -9999
         best_action = (0,0,0)
-        reward = 0
 
         for move in availableMoves:
             #generate new world
@@ -33,21 +32,22 @@ class qLearner:
                 break
 
             #make move
-            new_world.me(character).move(move[0], move[1])
             if move[2] == 1:
                 new_world.me(character).place_bomb()
+            new_world.me(character).move(move[0], move[1])
             new_world, events = new_world.next()
 
             #check if character is dead and why
+            q = 0
             if new_world.me(character) is None:
                 for event in events:
                     # check what type of event
-                    if event.tpe == Event.BOMB_HIT_CHARACTER or event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
-                        q = 0
-                        reward = -9999
+                    if new_world.me(character) == None and event.tpe == Event.BOMB_HIT_CHARACTER:
+                        q = -9999
+                    if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                        q = -9999
                     if event.tpe == Event.CHARACTER_FOUND_EXIT:
-                        q = 0
-                        reward = 9999
+                        q = 9999
             else:
                 q = self.approximate_Q_value(new_world, new_world.me(character))
 
@@ -55,16 +55,15 @@ class qLearner:
                 best_q = q
                 best_action = move
 
-        return best_q, best_action, reward
+        return best_q, best_action
 
 
 
     def updateWeights(self, oldWorld, newWorld, character, reward):
         delta = (reward + self.gamma*self.approximate_Q_value(newWorld, character))
-        delta = delta-self.approximate_Q_value(oldWorld, character)
 
         for i in range(len(self.weights)):
-            self.weights[i] = self.weights[i] + self.lr*delta*self.heuristics[i](newWorld, character)
+            self.weights[i] += (self.lr * delta * self.heuristics[i](newWorld, character))
 
 
     def getAvailableMoves(self, wrld, current):
