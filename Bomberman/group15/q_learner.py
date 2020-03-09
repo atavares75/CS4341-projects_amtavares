@@ -81,6 +81,8 @@ class qLearner:
 
         moves = []
         current = (char.x, char.y)
+        new_world = SensedWorld.from_world(wrld)
+        new_world, _ = new_world.next()
 
         # Go through the possible 8-moves
         #
@@ -90,12 +92,10 @@ class qLearner:
             if (current[0] + dx >= 0) and (current[0] + dx < wrld.width()):
                 # Loop through delta y
                 for dy in [-1, 0, 1]:
-                    # Make sure the character is moving
-                    if (dx != 0) or (dy != 0):
                         # Avoid out-of-bound indexing
                         if (current[1] + dy >= 0) and (current[1] + dy < wrld.height()):
                             # No need to check impossible moves
-                            if wrld.empty_at(current[0]+dx, current[1]+dy) or wrld.exit_at(current[0]+dx, current[1]+dy):
+                            if new_world.empty_at(current[0]+dx, current[1]+dy) or new_world.exit_at(current[0]+dx, current[1]+dy):
                                 if len(wrld.bombs) == 0:
                                     moves.append((dx, dy, 1))
                                 moves.append((dx, dy, 0))

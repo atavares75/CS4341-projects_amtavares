@@ -352,6 +352,20 @@ def f_to_closest_bomb(wrld, char):
 
     return 1 / (path_distance ** 2)
 
+def f_in_bomb_path(wrld, char):
+    bombs = find_bombs(wrld)
+    char_loc = (char.x, char.y)
+
+    if len(bombs) == 0:
+        return 0
+
+    x, y = find_closest_point(char_loc, bombs)
+
+    if char.x == x and abs(char.y-y) <= wrld.expl_range:
+        return 1
+    if char.y == y and abs(char.x-x) <= wrld.expl_range:
+        return 1
+    return 0
 
 def f_to_closest_exit(wrld, char):
     """ Find the distance to the closest wall """
