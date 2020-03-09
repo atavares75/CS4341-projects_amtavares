@@ -6,9 +6,12 @@ from f_functions import *
 from events import Event
 from sensed_world import SensedWorld
 
+import os
+import pickle
+
 # Training Values
 GAMMA = .9
-ALPHA = .2
+ALPHA = .9
 
 #Q Learner model
 class qLearner:
@@ -21,16 +24,18 @@ class qLearner:
 
         self.functions = functions
         self.bombs = bombs
-        self.pos = None
+        self.prevscore = None
+        self.newscore = None
         self.move = None
 
-    def get_possible_moves(self, wrld, current):
+    def get_possible_moves(self, wrld, char):
         """ Generate a list of possible coordinates to move to """
         # PARAM [world.World] wrld: the world which we want to search
         # PARAM [tuple of (int,int)] current: the current coordinate
         # RETURN [list of node.Node]: A list of node possible nodes to move to
 
         moves = []
+        current = (char.x, char.y)
 
         # Go through the possible 8-moves
         #
@@ -45,6 +50,8 @@ class qLearner:
                         # Avoid out-of-bound indexing
                         if (current[1] + dy >= 0) and (current[1] + dy < wrld.height()):
                             # No need to check impossible moves
+                            if check_exploding_bomb_path(wrld, char):
+                                continue
                             if self.bombs:
                                 moves.append((current[0] + dx, current[1] + dy, 1))
 
@@ -53,10 +60,10 @@ class qLearner:
         return moves
 
     def best_move(self, wrld, char):
-        max_q_score = -10000
+        max_q_score = -9999
         max_action = (0, 0, 0)
 
-        for move in self.get_possible_moves(wrld, (char.x, char.y)):
+        for move in self.get_possible_moves(wrld, char):
             new_world = SensedWorld.from_world(wrld)
 
             if new_world.me(char) is None:
@@ -85,12 +92,16 @@ class qLearner:
 
         return max_action, max_q_score
 
-    def update_weights(self, new_wrld, char, reward):
+    def update_weights(self, new_wrld, char, reward, variant):
         """ Update weights for qLearner """
         delta = reward - self.approximate_Q_value(new_wrld, char)
 
         for i in range(len(self.weights)):
             self.weights[i] += ALPHA * delta * self.functions[i](new_wrld, char)
+
+        path = get_weight_save_path(variant)
+        pickle.dump(self.weights, open(path, "wb"))
+
 
     def approximate_Q_value(self, wrld, char):
         """ Calculate the approximate Q value """

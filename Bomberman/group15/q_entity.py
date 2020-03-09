@@ -7,6 +7,7 @@ from entity import CharacterEntity
 from sensed_world import SensedWorld
 from f_functions import *
 
+
 class qEntity(CharacterEntity):
 
     def __init__(self, name, avatar, x, y, qLearner, trainModel, iterNum, maxIterations, bombs=True):
@@ -22,7 +23,7 @@ class qEntity(CharacterEntity):
         self.exit = None
 
         self.previousWorld = None
-        self.epsilon = math.sqrt(1 / 1 + iterNum)
+        self.epsilon = math.sqrt((1 /(1 + maxIterations)))
 
     def do(self, wrld):
         self.previousWorld = wrld
@@ -31,6 +32,7 @@ class qEntity(CharacterEntity):
         if self.trainModel:
             # e-greedy Exploration check
             if random.random() < self.epsilon:
+                print("random")
                 # Pick a random move
                 move_choices = [-1,0,1]
 
@@ -43,7 +45,6 @@ class qEntity(CharacterEntity):
                 dy = random.choice(move_choices)
                 rbomb = random.choice(bomb_choices)
 
-                self.qLearner.move = (dx, dy, rbomb)
                 # Random chance of placing bomb
                 if rbomb == 1:
                     self.place_bomb()
@@ -53,8 +54,8 @@ class qEntity(CharacterEntity):
 
             else:
                 # Call Q-Learner
+                print("QLEARNER")
                 move, _ = self.qLearner.best_move(wrld, self)
-                self.qLearner.move = move
 
                 dx, dy, bomb = move
 

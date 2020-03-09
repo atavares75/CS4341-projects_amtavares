@@ -1,5 +1,7 @@
 # This is necessary to find the main code
 import sys
+import csv
+import datetime
 
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
@@ -14,19 +16,21 @@ from f_functions import *
 import os
 import pickle
 
-path = os.path.dirname(os.path.dirname(os.getcwd()))
+weights_file = get_weight_save_path(1)
 
-weights_file = os.path.join(path, "Outputs/TrainingScores/variant1_weights.p")
+csv_path = get_csv_save_path(1)
 
-weights = [0, 0, 0, 0, 0]
+weights = [25, -20, -20, -10, -20]
 
 pickle.dump(weights, open(weights_file, 'wb'))
 
-QLearner = qLearner([f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_is_exploded])
+QLearner = qLearner([f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_is_exploded], bombs=False)
+print(QLearner.bombs)
 
-for i in range(0,1):
+start = datetime.datetime.now()
+for i in range(0,100):
     print(f"Iteration #{i}")
-
+    QLearner.weights = pickle.load(open(weights_file, 'rb'))
     # Create the game
     g = Game.fromfile('map.txt',)
 
@@ -34,19 +38,25 @@ for i in range(0,1):
                              "C",  # avatar
                               0, 0,  # position
                               QLearner, #qLearner
-                              False,
+                              True,
                               i,
                               1000
                               ))
 
     # Run game
     g.go(1)
+    # score = g.world.scores["me"]
+    with open(csv_path, 'a')as scorescsv:
+        writer = csv.writer(scorescsv)
+        writer.writerow([g.world.scores["me"]])
 
-    score = g.world.scores["me"]
-    print(g.world.scores)
+    print(QLearner.weights)
+
+end = datetime.datetime.now()
+print(end-start)
+
+    # QLearner.prevscore = g.world.scores["me"]
     # if score > 0:
     #     QLearner.update_weights(g.world, g.world.characters["me"], 9999)
     # else:
     #     QLearner.update_weights(g.world, g.world.characters["me"], -9999)
-
-    print(QLearner.pos, QLearner.move)
