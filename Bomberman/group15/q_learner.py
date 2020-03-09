@@ -47,15 +47,16 @@ class qLearner:
                 for dy in [-1, 0, 1]:
                     # Make sure the monster is moving
                     if (dx != 0) or (dy != 0):
-                        # Avoid out-of-bound indexing
-                        if (current[1] + dy >= 0) and (current[1] + dy < wrld.height()):
-                            # No need to check impossible moves
-                            if check_exploding_bomb_path(wrld, char):
-                                continue
-                            if self.bombs:
-                                moves.append((current[0] + dx, current[1] + dy, 1))
+                        if not (dx == 0 and dy == 0):
+                            # Avoid out-of-bound indexing
+                            if (current[1] + dy >= 0) and (current[1] + dy < wrld.height()):
+                                # No need to check impossible moves
+                                if check_exploding_bomb_path(wrld, char):
+                                    continue
+                                if self.bombs:
+                                    moves.append((current[0] + dx, current[1] + dy, 1))
 
-                            moves.append((current[0] + dx, current[1] + dy, 0))
+                                moves.append((current[0] + dx, current[1] + dy, 0))
 
         return moves
 

@@ -236,6 +236,20 @@ def find_monsters(wrld):
     return monsters
 
 
+def find_walls(wrld):
+    """ Find the coordinates of any wallss """
+    # PARAM [world.World] wrld: the world which we want to search
+    # RETURN [list of (int, int)]: coordinates of all monsters in the world
+
+    walls = []
+    for x in range(0, wrld.width()):
+        for y in range(0, wrld.height()):
+            if wrld.exit_at(x, y):
+                walls.append((x, y))
+
+    return walls
+
+
 def find_closest_point(origin, points):
     """ Find the closest point in a list of points to an origin point """
     # PARAM [tuple of (int, int)]: the coordinates of the origin point
@@ -301,6 +315,23 @@ def f_to_closest_monster(wrld, char):
 
     closest_mnstr = find_closest_point(char_loc, monsters)
     path_distance = 1 + aStarSearch(wrld, char_loc, closest_mnstr)[1]
+
+    return 1 / (path_distance**2)
+
+
+def f_to_closest_wall(wrld, char):
+    """ Find the distance to the closest wall """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    walls = find_walls(wrld)
+    char_loc = (char.x, char.y)
+
+    if len(walls) == 0:
+        return 0
+
+    closest_wall = find_closest_point(char_loc, walls)
+    path_distance = 1 + aStarSearch(wrld, char_loc, closest_wall)[1]
 
     return 1 / (path_distance**2)
 

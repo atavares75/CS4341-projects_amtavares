@@ -20,11 +20,11 @@ weights_file = get_weight_save_path(1)
 
 csv_path = get_csv_save_path(1)
 
-weights = [25, -20, -20, -10, -20]
+weights = [25, -20, -20, -10, -20, -20]
 
 pickle.dump(weights, open(weights_file, 'wb'))
 
-QLearner = qLearner([f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_is_exploded], bombs=False)
+QLearner = qLearner([f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_is_exploded, f_to_closest_wall], bombs=False)
 print(QLearner.bombs)
 
 start = datetime.datetime.now()
