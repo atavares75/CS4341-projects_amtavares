@@ -23,10 +23,14 @@ class qEntity(CharacterEntity):
 
 
     def do(self, world):
+        self.previousWorld = world
         self.iterNum += 1
         if self.iterNum == self.maxIterations:
             return
-        randomChance = 1 / (self.iterNum + 1) ** .5
+        randomChance = 1 / (self.iterNum + 1)
+        bomb = 0
+        dx = 0
+        dy = 0
         if self.trainModel and random.random() < randomChance:
             moves = [-1,0,1]
             dx = random.choice(moves)
@@ -35,7 +39,6 @@ class qEntity(CharacterEntity):
             if bombs == 1:
                 self.place_bomb()
             self.move(dx,dy)
-
         else:
             # Call Q-Learner
             q, move = self.qLearner.best_move(world, self)
@@ -43,25 +46,37 @@ class qEntity(CharacterEntity):
             if bomb == 1:
                 self.place_bomb()
             self.move(dx, dy)
-        self.previousWorld = world
+
+        if self.trainModel:
+            new_world = SensedWorld.from_world(world)
+            if bomb == 1:
+                new_world.me(self).place_bomb()
+            new_world.me(self).move(dx, dy)
+            new_world, _ = new_world.next()
+            self.qLearner.updateWeights(self.previousWorld, new_world, self, 0)
+
+
+
 
 
 
     # updates weights
     def done(self, wrld):
-        print("Done")
+        print("Updating")
         if self.trainModel:
             reward = 0
             for event in wrld.events:
-                if wrld.me(self) == None and event.tpe == Event.BOMB_HIT_CHARACTER:
-                    q = -50
+                if event.tpe == Event.BOMB_HIT_CHARACTER:
+                    reward = -50
+                    break
                 if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
-                    q = -50
+                    reward = -50
+                    break
                 if event.tpe == Event.CHARACTER_FOUND_EXIT:
                     reward = 100
                     break
             if reward == 0:
-                reward = ((f_to_closest_exit(wrld, self)**.2)*5 - (f_to_closest_monster(wrld, self)**.2))
+                reward = ((f_to_closest_exit(wrld, self))**5 - (f_to_closest_monster(wrld, self)**.2))
 
             self.qLearner.updateWeights(self.previousWorld, wrld, self, reward)
 

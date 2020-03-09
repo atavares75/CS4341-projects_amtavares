@@ -39,19 +39,21 @@ class qLearner:
 
             #check if character is dead and why
             q = 0
-            if new_world.me(character) is None:
-                for event in events:
-                    # check what type of event
-                    if new_world.me(character) == None and event.tpe == Event.BOMB_HIT_CHARACTER:
-                        q = -9999
-                    if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
-                        q = -9999
-                    if event.tpe == Event.CHARACTER_FOUND_EXIT:
-                        q = 9999
-            else:
+            for event in events:
+                # check what type of event
+                if event.tpe == Event.BOMB_HIT_CHARACTER:
+                    q = -9999
+                    break
+                if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                    q = -9999
+                    break
+                if event.tpe == Event.CHARACTER_FOUND_EXIT:
+                    q = 9999
+                    break
+            if q == 0:
                 q = self.approximate_Q_value(new_world, new_world.me(character))
 
-            if q > best_q:
+            if q >= best_q:
                 best_q = q
                 best_action = move
 
@@ -60,10 +62,14 @@ class qLearner:
 
 
     def updateWeights(self, oldWorld, newWorld, character, reward):
-        delta = (reward + self.gamma*self.approximate_Q_value(newWorld, character))
-
+        if newWorld.me(character) is not None:
+            aQv = self.approximate_Q_value(newWorld, newWorld.me(character))
+        else:
+            aQv = 0
+        delta = (reward + self.gamma*aQv)-self.approximate_Q_value(oldWorld, character)
+        print("updating")
         for i in range(len(self.weights)):
-            self.weights[i] += (self.lr * delta * self.heuristics[i](newWorld, character))
+            self.weights[i] += (self.lr * delta * self.heuristics[i](oldWorld, character))
 
 
     def getAvailableMoves(self, wrld, current):
@@ -87,8 +93,10 @@ class qLearner:
                         # Avoid out-of-bound indexing
                         if (current[1] + dy >= 0) and (current[1] + dy < wrld.height()):
                             # No need to check impossible moves
-                            moves.append((current[0] + dx, current[1] + dy, 1))
-                            moves.append((current[0] + dx, current[1] + dy, 0))
+                            if wrld.empty_at(current[0]+dx, current[1]+dy) or wrld.exit_at(current[0]+dx, current[1]+dy):
+                                if len(wrld.bombs) == 0:
+                                    moves.append((current[0] + dx, current[1] + dy, 1))
+                                moves.append((current[0] + dx, current[1] + dy, 0))
 
         return moves
 
@@ -96,7 +104,7 @@ class qLearner:
     def approximate_Q_value(self, world, character):
         sum = 0
         for i in range(len(self.heuristics)):
-            sum += self.weights[i]*self.heuristics[i](world, character)
+            sum += self.weights[i]*self.heuristics[i](world, world.me(character))
 
         return sum
 
