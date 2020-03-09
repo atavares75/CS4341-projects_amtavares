@@ -29,16 +29,16 @@ else:
     wf = open(weights_file, 'wb')
     pickle.dump(weights, wf)
 
-QLearner = qLearner(weights, [f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_time_to_explosion])
+QLearner = qLearner(weights, [f_to_closest_exit, f_to_closest_monster, f_to_closest_bomb, f_existing_bomb, f_time_to_explosion], learning_rate = 0.4)
 print(QLearner.weights)
-for i in range(0,10):
+for i in range(0,1):
     print(f"Iteration #{i}")
 
     # Create the game
     g = Game.fromfile('map.txt',)
 
     # name, avatar, x, y, qLearner, iterNum, maxIterations, trainModel=False
-    g.add_character(qEntity("me", "C", 0, 0, QLearner, 1, 1000, True))
+    g.add_character(qEntity("me", "C", 0, 0, QLearner, i, 1000, True))
 
     # Run game
     g.go(1)
@@ -51,7 +51,4 @@ for i in range(0,10):
     #     QLearner.update_weights(g.world, g.world.characters["me"], -9999)
 
     print(QLearner.weights)
-    weights = QLearner.weights
-
-pickle.dump(weights, open(weights_file, 'wb'))
-wf.close()
+    pickle.dump(weights, open(weights_file, 'wb'))
