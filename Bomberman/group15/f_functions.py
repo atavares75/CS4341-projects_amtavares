@@ -61,7 +61,7 @@ def get_possible_moves(wrld, current):
     return neighbors
 
 
-def aStarSearch(wrld, start, end):
+def aStarSearch(wrld, start, end, ignore_walls = False):
     """ Perform the search for the A* algorithm """
     # PARAM [world.World] wrld: the world which we want to search
     # RETURN [list of (int, int)]: a list of coordinates leading to the target node
@@ -100,7 +100,7 @@ def aStarSearch(wrld, start, end):
 
         # Loop through possible neighbors
         for neighbor in get_possible_moves(wrld, current):
-            if not wrld.wall_at(neighbor[0], neighbor[1]):
+            if not wrld.wall_at(neighbor[0], neighbor[1]) or ignore_walls:
                 # Calculate new cost for the neighbor
                 new_cost = cost_so_far[current] + cost_of_move
                 if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
@@ -144,6 +144,16 @@ def get_movelist(wrld, start, end):
 
     # Find the path from start to end
     path, _ = aStarSearch(wrld, start, end)
+    return movelist_from_path(path)
+
+def get_movelist2(wrld, start, end):
+    """ Generate a movelist from on point to another """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [tuple of (int,int)] start: coordinates of the start point
+    # PARAM [tuple of (int,int)] end: coordinates of the end point
+
+    # Find the path from start to end
+    path, _ = aStarSearch(wrld, start, end, ignore_walls=True)
     return movelist_from_path(path)
 
 
@@ -318,6 +328,23 @@ def f_to_closest_monster(wrld, char):
 
     return 1 / (path_distance**2)
 
+def f_distance_closest_monster(wrld, char):
+    """ Find the distance to the closest monster """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    monsters = find_monsters(wrld)
+    char_loc = (char.x, char.y)
+
+    if len(monsters) == 0:
+        return 0
+
+    closest_mnstr = find_closest_point(char_loc, monsters)
+    path_distance = 1 + diagonal_distance(char_loc, closest_mnstr)
+
+
+    return 1 / (path_distance**2)
+
 
 def f_to_closest_wall(wrld, char):
     """ Find the distance to the closest wall """
@@ -352,6 +379,22 @@ def f_to_closest_bomb(wrld, char):
 
     return 1 / (path_distance ** 2)
 
+def f_distance_closest_bomb(wrld, char):
+    """ Find the distance to the closest monster """
+    # PARAM [world.World] wrld: the world which we want to search
+    # PARAM [entity.CharacterEntity] char: a character entity
+
+    bombs = find_bombs(wrld)
+    char_loc = (char.x, char.y)
+
+    if len(bombs) == 0:
+        return 0
+
+    closest_bomb = find_closest_point(char_loc, bombs)
+    path_distance = 1 + diagonal_distance(char_loc, closest_bomb)
+
+    return 1 / (path_distance ** 2)
+
 def f_in_bomb_path(wrld, char):
     bombs = find_bombs(wrld)
     char_loc = (char.x, char.y)
@@ -381,7 +424,18 @@ def f_to_closest_exit(wrld, char):
     closest_exit = find_closest_point(char_loc, exits)
     path_distance = 1 + aStarSearch(wrld, char_loc, closest_exit)[1]
 
-    return 1 / (path_distance)
+    return 1/(path_distance)
+
+def f_diagonal_distance(wrld, char):
+    exits = find_exits(wrld)
+    char_loc = (char.x, char.y)
+    if len(exits) == 0:
+        return 0
+
+    closest_exit = find_closest_point(char_loc, exits)
+    path_distance = 1 + diagonal_distance(char_loc, closest_exit)
+
+    return 1/path_distance
 
 
 def f_existing_bomb(wrld, char = None):

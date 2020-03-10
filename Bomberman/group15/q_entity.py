@@ -38,7 +38,8 @@ class qEntity(CharacterEntity):
         else:
             # Call Q-Learner
             move, _ = self.qLearner.best_move(world, self)
-            dx, dy, bomb = move
+            if move is not None:
+                dx, dy, bomb = move
             if bomb == 1:
                 self.place_bomb()
             self.move(dx, dy)
